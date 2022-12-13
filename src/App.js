@@ -1,17 +1,45 @@
-import { Provider } from 'react-redux';
-import { store } from './redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 import Cart from './components/Cart/Cart';
 import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
+import Notification from './components/UI/Notification';
+import { fetchCartData, sendCartData } from './redux/cartActions';
+
+let isInitialLoad = true;
 
 function App() {
+	const showCart = useSelector((state) => state.ui.showCart);
+	const cart = useSelector((state) => state.cart);
+	const notification = useSelector((state) => state.ui.notification);
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		dispatch(fetchCartData());
+		return () => {};
+	}, [dispatch]);
+
+	useEffect(() => {
+		if (isInitialLoad) {
+			isInitialLoad = false;
+			return;
+		}
+
+		if (cart.changed) {
+			dispatch(sendCartData(cart));
+		}
+
+		return () => {};
+	}, [cart, dispatch]);
+
 	return (
-		<Provider store={store}>
+		<>
+			{notification && <Notification status={notification.status} title={notification.title} message={notification.message} />}
 			<Layout>
-				<Cart />
+				{showCart && <Cart />}
 				<Products />
 			</Layout>
-		</Provider>
+		</>
 	);
 }
 
