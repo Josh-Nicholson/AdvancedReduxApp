@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { fetchCartData } from './cartActions';
 
 const initialState = {
 	cartItems: [], //{id: "", title: "", description: "", quantity: "", price: ""}
@@ -10,10 +11,6 @@ export const cartSlice = createSlice({
 	name: 'cart',
 	initialState,
 	reducers: {
-		replaceCart: (state, action) => {
-			state.cartItems = action.payload.cartItems;
-			state.totalPrice = action.payload.totalPrice;
-		},
 		addItem: (state, action) => {
 			const passedInItem = action.payload;
 			const cartItem = state.cartItems.find((e) => e.id === passedInItem.id);
@@ -58,8 +55,14 @@ export const cartSlice = createSlice({
 				};
 			}
 		}
+	},
+	extraReducers: (builder) => {
+		builder.addCase(fetchCartData.fulfilled, (state, action) => {
+			state.totalPrice = action.payload.totalPrice;
+			state.cartItems = action.payload.cartItems;
+		});
 	}
 });
 
-export const { replaceCart, addItem, removeItem, toggleCart } = cartSlice.actions;
-export default cartSlice.reducer;
+export const cartActions = cartSlice.actions;
+export default cartSlice;
